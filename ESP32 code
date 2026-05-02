@@ -1,0 +1,61 @@
+// Pins
+const int potPin = 34;
+const int ldrPin = 35;
+const int ledPin = 25;
+
+// PWM
+const int pwmFreq = 5000;
+const int pwmResolution = 8;
+
+void setup() {
+  Serial.begin(115200);
+  ledcAttach(ledPin, pwmFreq, pwmResolution);
+}
+
+void loop() {
+
+  // =========================
+  // A1: Potentiometer → LED Brightness
+  // =========================
+  int potValue = analogRead(potPin);
+  int brightness = map(potValue, 0, 4095, 0, 255);
+
+  // =========================
+  // A2: LDR → Light Detection
+  // =========================
+  int ldrValue = analogRead(ldrPin);
+
+  // Convert to "lux" (scaled for display only)
+  float lux = map(ldrValue, 0, 4095, 0, 50000);
+
+  // Auto LED control
+  if (ldrValue > 2000) {
+    brightness = 0; // bright → OFF
+  }
+
+  ledcWrite(ledPin, brightness);
+
+  // =========================
+  // A3: "Temperature" controlled by LDR
+  // =========================
+  // Map LDR to temperature range (adjustable)
+  float temperatureC = map(ldrValue, 0, 4095, -10, 50);
+
+  // =========================
+  // SERIAL OUTPUT (your format)
+  // =========================
+  Serial.print("Potentiometer: ");
+  Serial.print(potValue);
+
+  Serial.print(" | LDR: ");
+  Serial.print(ldrValue);
+
+  Serial.print(" | LDR Lux: ");
+  Serial.print(lux);
+
+  Serial.print(" | NTC Temp: ");
+  Serial.print(temperatureC);
+  Serial.println(" °C");
+
+  delay(500);
+}
